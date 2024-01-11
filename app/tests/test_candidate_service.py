@@ -1,4 +1,4 @@
-# app/tests/test_candidate_service.py
+# src/tests/test_candidate_service.py
 
 from app.models.candidate import Candidate
 from app.repositories.candidate_repository import CandidateRepository

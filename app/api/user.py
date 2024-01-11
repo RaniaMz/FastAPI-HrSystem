@@ -1,36 +1,64 @@
-# app/api/user.py
-from uuid import UUID
-
-from fastapi import APIRouter, HTTPException, Depends
-from app.models.user import User
+# src/api/user.py
+from fastapi import APIRouter, HTTPException
+from starlette import status
+from app.models.user import User, UpdateUser
 from app.services.user_service import UserService
 
 router = APIRouter()
 
 
-@router.post("/user")
-async def create_user(user: User, user_service: UserService = Depends(UserService)):
-    user_service.create_user(user)
-    return {"message": "User created successfully"}
+@router.post("/user",
+             response_description='create user',
+             status_code=status.HTTP_201_CREATED,
+             response_model=User,
+             tags=['User Section'])
+async def create_user(user: User):
+    try:
+        return await UserService().create_user(user)
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"An error occurred: {str(e)}")
 
 
-@router.get("/user/{uuid}")
-async def get_user(uuid: UUID, user_service: UserService = Depends(UserService)):
-    return user_service.get_user(uuid)
+@router.get("/user/{id}",
+            response_description='get user',
+            status_code=status.HTTP_200_OK,
+            response_model=User,
+            tags=['User Section'])
+async def get_user(id: str):
+    try:
+
+        return await UserService().get_user(id)
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"An error occurred: {str(e)}")
 
 
-@router.put("/user/{uuid}")
-async def update_user(uuid: UUID, updated_user: User, user_service: UserService = Depends(UserService)):
-    user_service.update_user(uuid, updated_user)
-    return {"message": "User updated successfully"}
+@router.put("/user/{id}",
+            response_description='update user',
+            status_code=status.HTTP_202_ACCEPTED,
+            response_model=UpdateUser,
+            tags=['User Section'])
+async def update_user(id: str, updated_user: UpdateUser):
+    try:
+        return await UserService().update_user(id, updated_user)
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"An error occurred: {str(e)}")
 
 
-@router.delete("/user/{uuid}")
-async def delete_user(uuid: UUID, user_service: UserService = Depends(UserService)):
-    user_service.delete_user(uuid)
-    return {"message": "User deleted successfully"}
+@router.delete("/user/{id}",
+               response_description='Delete user',
+               status_code=status.HTTP_200_OK,
+               response_model=str,
+               tags=['User Section'])
+async def delete_user(id: str):
+    try:
+        return await UserService().delete_user(id)
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"An error occurred: {str(e)}")
 
 
-@router.get("/users")
-async def get_all_users(user_service: UserService = Depends(UserService)):
-    return user_service.get_all_users()
+@router.get("/users",
+            response_description="List all users",
+            status_code=status.HTTP_200_OK,
+            tags=['User Section'])
+async def get_all_users():
+    return await UserService().get_all_users()

@@ -1,4 +1,4 @@
-# app/tests/test_user_service.py
+# src/tests/test_user_service.py
 
 from app.models.user import User
 from app.repositories.user_repository import UserRepository

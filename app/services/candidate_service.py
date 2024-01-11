@@ -1,36 +1,34 @@
-# app/services/candidate_service.py
-
-from app.models.candidate import Candidate
+# src/services/candidate_service.py
+from app.models.candidate import Candidate, UpdateCandidate
 from app.repositories.candidate_repository import CandidateRepository
 from fastapi import HTTPException
-from uuid import UUID
 from typing import List
 
 
 class CandidateService:
-    def __init__(self, candidate_repository: CandidateRepository):
-        self.candidate_repository = candidate_repository
+    def __init__(self):
+        self.candidate_repository = CandidateRepository()
 
     def create_candidate(self, candidate: Candidate):
-        self.candidate_repository.create_candidate(candidate)
+        return self.candidate_repository.create_candidate(candidate)
 
-    def get_candidate(self, uuid: UUID) -> Candidate:
-        candidate = self.candidate_repository.get_candidate(uuid)
+    async def get_candidate(self, id: str) -> Candidate:
+        candidate = await self.candidate_repository.get_candidate(id)
         if candidate is None:
             raise HTTPException(status_code=404, detail="Candidate not found")
         return candidate
 
-    def update_candidate(self, uuid: UUID, updated_candidate: Candidate):
-        existing_candidate = self.candidate_repository.get_candidate(uuid)
+    async def update_candidate(self, id: str, updated_candidate: UpdateCandidate):
+        existing_candidate = await self.candidate_repository.get_candidate(id)
         if existing_candidate is None:
             raise HTTPException(status_code=404, detail="Candidate not found")
-        self.candidate_repository.update_candidate(uuid, updated_candidate)
+        return await self.candidate_repository.update_candidate(id, updated_candidate)
 
-    def delete_candidate(self, uuid: UUID):
-        existing_candidate = self.candidate_repository.get_candidate(uuid)
+    async def delete_candidate(self, id: str):
+        existing_candidate = await self.candidate_repository.get_candidate(id)
         if existing_candidate is None:
             raise HTTPException(status_code=404, detail="Candidate not found")
-        self.candidate_repository.delete_candidate(uuid)
+        await self.candidate_repository.delete_candidate(id)
 
-    def get_all_candidates(self) -> List[Candidate]:
-        return self.candidate_repository.get_all_candidates()
+    async def get_all_candidates(self) -> List[Candidate]:
+        return await self.candidate_repository.get_all_candidates()

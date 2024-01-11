@@ -1,36 +1,38 @@
-# app/services/user_service.py
+# src/services/user_service.py
 
-from app.models.user import User
+from app.models.user import User, UpdateUser
 from app.repositories.user_repository import UserRepository
-from fastapi import HTTPException
-from uuid import UUID
-from typing import List
+from fastapi import HTTPException, Depends
+
+
+def is_user_authorized_all_candidates(user: User) -> bool:
+    return 'admin' in user.roles
 
 
 class UserService:
-    def __init__(self, user_repository: UserRepository):
-        self.user_repository = user_repository
+    def __init__(self):
+        self.user_repository = UserRepository()
 
-    def create_user(self, user: User):
-        self.user_repository.create_user(user)
+    async def create_user(self, user: User):
+        return await self.user_repository.create_user(user)
 
-    def get_user(self, uuid: UUID) -> User:
-        user = self.user_repository.get_user(uuid)
+    async def get_user(self, id: str):
+        user = await self.user_repository.get_user(id)
         if user is None:
             raise HTTPException(status_code=404, detail="User not found")
         return user
 
-    def update_user(self, uuid: UUID, updated_user: User):
-        existing_user = self.user_repository.get_user(uuid)
+    async def update_user(self, id: str, updated_user: UpdateUser):
+        existing_user = await self.user_repository.get_user(id)
         if existing_user is None:
             raise HTTPException(status_code=404, detail="User not found")
-        self.user_repository.update_user(uuid, updated_user)
+        return await self.user_repository.update_user(id, updated_user)
 
-    def delete_user(self, uuid: UUID):
-        existing_user = self.user_repository.get_user(uuid)
+    async def delete_user(self, id: str):
+        existing_user = await self.user_repository.get_user(id)
         if existing_user is None:
             raise HTTPException(status_code=404, detail="User not found")
-        self.user_repository.delete_user(uuid)
+        return await self.user_repository.delete_user(id)
 
-    def get_all_users(self) -> List[User]:
-        return self.user_repository.get_all_users()
+    async def get_all_users(self):
+        return await self.user_repository.get_all_users()

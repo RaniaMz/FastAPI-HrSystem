@@ -1,9 +1,7 @@
-# app/utils/csv_generator.py
-
-import csv
 import os
-from app.models.candidate import Candidate
+import csv
 from typing import List
+from app.models.candidate import Candidate
 
 
 def generate_csv_report(candidates: List[Candidate]) -> str:
@@ -16,16 +14,15 @@ def generate_csv_report(candidates: List[Candidate]) -> str:
     Returns:
         str: File path of the generated CSV report.
     """
-    if not candidates:
-        raise ValueError("No candidates provided to generate a report.")
+    report_dir = "reports"
+    os.makedirs(report_dir, exist_ok=True)
 
     report_filename = "candidates_report.csv"
-    report_file_path = os.path.join("reports", report_filename)
+    report_file_path = os.path.join(report_dir, report_filename)
 
     with open(report_file_path, mode="w", newline="", encoding="utf-8") as file:
         writer = csv.writer(file)
 
-        # Write header
         header = [
             "First Name", "Last Name", "Email", "UUID", "Career Level", "Job Major",
             "Years of Experience", "Degree Type", "Skills", "Nationality", "City",
@@ -33,7 +30,6 @@ def generate_csv_report(candidates: List[Candidate]) -> str:
         ]
         writer.writerow(header)
 
-        # Write candidate information
         for candidate in candidates:
             row = [
                 candidate.first_name, candidate.last_name, candidate.email,

@@ -1,8 +1,9 @@
-# app/tests/test_candidate_repository.py
+# src/tests/test_candidate_repository.py
 
 from app.models.candidate import Candidate
 from app.repositories.candidate_repository import CandidateRepository
 from uuid import uuid4
+
 
 def test_create_candidate():
     repository = CandidateRepository()
@@ -25,6 +26,7 @@ def test_create_candidate():
     repository.create_candidate(candidate)
     assert len(repository.candidates) == 1
 
+
 def test_get_candidate():
     repository = CandidateRepository()
     candidate = Candidate(
@@ -46,6 +48,7 @@ def test_get_candidate():
     repository.create_candidate(candidate)
     retrieved_candidate = repository.get_candidate(candidate.uuid)
     assert retrieved_candidate == candidate
+
 
 def test_update_candidate():
     repository = CandidateRepository()
@@ -106,7 +109,7 @@ def test_delete_candidate():
 
     repository.create_candidate(candidate)
     repository.delete_candidate(candidate.uuid)
-    assert len(repository.candidates) == 0
+    assert len(repository.get_all_candidates()) == 0
 
 
 def test_get_all_candidates():

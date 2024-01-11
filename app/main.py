@@ -1,22 +1,35 @@
-from fastapi import FastAPI
-from api.user import router as user_router
-from api.candidate import router as candidate_router
+import os
 
-app = FastAPI()
+from fastapi import FastAPI, Depends
+from starlette.datastructures import CommaSeparatedStrings
+from starlette.middleware.cors import CORSMiddleware
+from app.api import user, candidate, utils
+from dotenv import dotenv_values
+from app.utils.auth import has_access
+from app.db.mongodb_utils import connect_to_mongo, close_mongo_connection
 
-app.include_router(user_router, prefix="/users", tags=["users"])
-app.include_router(candidate_router, prefix="/candidates", tags=["candidates"])
+app = FastAPI(title="User Candidate System API", )
+config = dotenv_values(".env")
 
+ALLOWED_HOSTS = CommaSeparatedStrings(os.getenv("ALLOWED_HOSTS", ""))
 
-@app.get("/")
-def read_root():
-    return {"message": "Hello World"}
+PROTECTED = [Depends(has_access)]
 
+# include all routes
+app.include_router(utils.router)
+app.include_router(user.router)
+app.include_router(candidate.router, dependencies=PROTECTED)
 
-@app.get("/health")
-def read_health():
-    return {"status": "OK"}
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=ALLOWED_HOSTS,
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
 
+app.add_event_handler("startup", connect_to_mongo)
+app.add_event_handler("shutdown", close_mongo_connection)
 
 if __name__ == "__main__":
     import uvicorn
